@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Home — BreedSense AI{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8 text-center">
+
+    <!-- Hero -->
+    <span
+        class="inline-flex items-center gap-1.5 rounded-full bg-brand-600/10 px-3 py-1 text-xs font-semibold text-brand-400 ring-1 ring-brand-500/20 mb-6">
+        <i data-lucide="zap" class="h-3.5 w-3.5"></i> Deep Learning Powered
+    </span>
+
+    <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+        Identify Indian Cattle Breeds<br class="hidden sm:inline" />
+        <span class="text-brand-400">in Seconds</span>
+    </h1>
+
+    <p class="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
+        Upload a photograph and our ResNet-50 model will classify it across
+        <strong class="text-gray-300">5 indigenous breeds</strong> — Gir, Sahiwal, Red Sindhi, Tharparkar, and Kankrej.
+    </p>
+
+    <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <a href="{{ url_for('main.upload') }}"
+            class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 hover:bg-brand-500 transition">
+            <i data-lucide="upload-cloud" class="h-4 w-4"></i>
+            Start Analysing
+        </a>
+        <a href="{{ url_for('main.about') }}"
+            class="inline-flex items-center gap-2 rounded-xl border border-gray-700 bg-gray-800/50 px-7 py-3.5 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition">
+            Learn More
+        </a>
+    </div>
+
+    <!-- Feature cards -->
+    <div class="mt-20 grid sm:grid-cols-3 gap-6 text-left">
+        <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-6">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600/20 mb-4">
+                <i data-lucide="brain" class="h-5 w-5 text-brand-400"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-white mb-1">Deep Learning</h3>
+            <p class="text-xs text-gray-500 leading-relaxed">ResNet-50 architecture fine-tuned on cattle imagery for
+                high-accuracy classification.</p>
+        </div>
+        <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-6">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600/20 mb-4">
+                <i data-lucide="timer" class="h-5 w-5 text-brand-400"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-white mb-1">Instant Results</h3>
+            <p class="text-xs text-gray-500 leading-relaxed">Get breed predictions with confidence scores in under a
+                second.</p>
+        </div>
+        <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-6">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600/20 mb-4">
+                <i data-lucide="database" class="h-5 w-5 text-brand-400"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-white mb-1">Prediction History</h3>
+            <p class="text-xs text-gray-500 leading-relaxed">Every prediction is logged to MongoDB for research and
+                audit trails.</p>
+        </div>
+    </div>
+
+</div>
+
+<script>lucide.createIcons();</script>
+{% endblock %}

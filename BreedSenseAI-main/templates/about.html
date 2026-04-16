@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}About — BreedSense AI{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+
+    <span
+        class="inline-flex items-center gap-1.5 rounded-full bg-brand-600/10 px-3 py-1 text-xs font-semibold text-brand-400 ring-1 ring-brand-500/20 mb-6">
+        <i data-lucide="info" class="h-3.5 w-3.5"></i> About
+    </span>
+
+    <h1 class="text-3xl font-extrabold tracking-tight text-white mb-6">About BreedSense AI</h1>
+
+    <div class="space-y-4 text-sm leading-relaxed text-gray-400">
+        <p>
+            <strong class="text-gray-200">BreedSense AI</strong> is a capstone project that applies deep learning to
+            the identification of Indian cattle breeds. Accurate breed recognition helps farmers, veterinarians, and
+            livestock agencies make better breeding and healthcare decisions.
+        </p>
+        <p>
+            The system uses a <strong class="text-gray-200">ResNet-50</strong> model fine-tuned on a curated dataset of
+            five indigenous breeds — <em>Gir, Sahiwal, Red Sindhi, Tharparkar,</em> and <em>Kankrej</em>. Predictions
+            are
+            served through a Flask web application with a MongoDB backend for logging.
+        </p>
+    </div>
+
+    <!-- Tech stack -->
+    <h2 class="text-lg font-semibold text-white mt-10 mb-4">Technology Stack</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {% for tech in ["Flask", "PyTorch", "MongoDB", "TailwindCSS"] %}
+        <div
+            class="rounded-lg border border-gray-800 bg-gray-900/60 px-4 py-3 text-center text-xs font-semibold text-gray-300">
+            {{ tech }}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>lucide.createIcons();</script>
+{% endblock %}

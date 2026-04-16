@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction History — BreedSense AI{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div>
+            <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-brand-600/10 px-3 py-1 text-xs font-semibold text-brand-400 ring-1 ring-brand-500/20 mb-3">
+                <i data-lucide="clock" class="h-3.5 w-3.5"></i> Prediction Log
+            </span>
+            <h1 class="text-3xl font-extrabold tracking-tight text-white">History</h1>
+            <p class="mt-1 text-sm text-gray-500">All past predictions stored in MongoDB.</p>
+        </div>
+        <a href="{{ url_for('main.upload') }}"
+            class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 hover:bg-brand-500 transition self-start">
+            <i data-lucide="plus" class="h-4 w-4"></i>
+            New Prediction
+        </a>
+    </div>
+
+    {% if predictions %}
+
+    <!-- Stats row -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+            <p class="text-[11px] font-medium uppercase tracking-wider text-gray-500 mb-1">Total</p>
+            <p class="text-2xl font-bold text-white">{{ predictions | length }}</p>
+        </div>
+        <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+            <p class="text-[11px] font-medium uppercase tracking-wider text-gray-500 mb-1">Unique Breeds</p>
+            <p class="text-2xl font-bold text-white">{{ predictions | map(attribute='predicted_breed') | unique | list |
+                length }}</p>
+        </div>
+        <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+            <p class="text-[11px] font-medium uppercase tracking-wider text-gray-500 mb-1">Avg Confidence</p>
+            {% set scores = predictions | map(attribute='confidence_score') | list %}
+            <p class="text-2xl font-bold text-brand-400">{{ "%.1f" | format(scores | sum / scores | length) }}%</p>
+        </div>
+        <div class="rounded-xl border border-gray-800 bg-gray-900/60 p-4">
+            <p class="text-[11px] font-medium uppercase tracking-wider text-gray-500 mb-1">Last Prediction</p>
+            <p class="text-sm font-semibold text-gray-300">{{ predictions[0].timestamp_display }}</p>
+        </div>
+    </div>
+
+    <!-- Table card -->
+    <div class="rounded-2xl border border-gray-800 bg-gray-900/60 backdrop-blur-sm shadow-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr
+                        class="border-b border-gray-800 bg-gray-900/80 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                        <th class="px-6 py-4">#</th>
+                        <th class="px-6 py-4">Image</th>
+                        <th class="px-6 py-4">Filename</th>
+                        <th class="px-6 py-4">Predicted Breed</th>
+                        <th class="px-6 py-4">Confidence</th>
+                        <th class="px-6 py-4">Date &amp; Time</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-800/60">
+                    {% for pred in predictions %}
+                    <tr class="hover:bg-gray-800/40 transition-colors">
+                        <!-- Row number -->
+                        <td class="px-6 py-4 text-gray-500 font-mono text-xs">{{ loop.index }}</td>
+
+                        <!-- Thumbnail -->
+                        <td class="px-6 py-4">
+                            <img src="{{ url_for('static', filename='uploads/' + pred.filename) }}"
+                                alt="{{ pred.predicted_breed }}"
+                                class="h-12 w-12 rounded-lg border border-gray-700 object-cover" loading="lazy" />
+                        </td>
+
+                        <!-- Filename -->
+                        <td class="px-6 py-4">
+                            <span class="text-gray-300 truncate max-w-[140px] block"
+                                title="{{ pred.original_filename or pred.filename }}">
+                                {{ pred.original_filename or pred.filename }}
+                            </span>
+                        </td>
+
+                        <!-- Breed -->
+                        <td class="px-6 py-4">
+                            <span
+                                class="inline-flex items-center gap-1.5 rounded-full bg-brand-600/10 px-3 py-1 text-xs font-semibold text-brand-400 ring-1 ring-brand-500/20">
+                                🐄 {{ pred.predicted_breed }}
+                            </span>
+                        </td>
+
+                        <!-- Confidence bar -->
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <div class="h-2 w-20 rounded-full bg-gray-800 overflow-hidden">
+                                    {% set conf = pred.confidence_score %}
+                                    <div class="h-full rounded-full transition-all duration-500
+                                        {% if conf >= 80 %}bg-brand-500
+                                        {% elif conf >= 50 %}bg-yellow-500
+                                        {% else %}bg-red-500{% endif %}" style="width: {{ conf }}%"></div>
+                                </div>
+                                <span class="text-xs font-semibold
+                                    {% if conf >= 80 %}text-brand-400
+                                    {% elif conf >= 50 %}text-yellow-400
+                                    {% else %}text-red-400{% endif %}">
+                                    {{ conf }}%
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Timestamp -->
+                        <td class="px-6 py-4 text-gray-400 text-xs whitespace-nowrap">
+                            {{ pred.timestamp_display }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% else %}
+
+    <!-- Empty state -->
+    <div class="rounded-2xl border border-gray-800 bg-gray-900/60 p-16 text-center">
+        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-800 mx-auto mb-4">
+            <i data-lucide="inbox" class="h-8 w-8 text-gray-600"></i>
+        </div>
+        <h2 class="text-lg font-semibold text-gray-300 mb-1">No predictions yet</h2>
+        <p class="text-sm text-gray-500 mb-6">Upload an image to get your first breed prediction.</p>
+        <a href="{{ url_for('main.upload') }}"
+            class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-500 transition">
+            <i data-lucide="upload-cloud" class="h-4 w-4"></i>
+            Go to Upload
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+
+<script>lucide.createIcons();</script>
+{% endblock %}

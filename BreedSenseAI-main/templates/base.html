@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Cattle Breed Recognition{% endblock %}</title>
+
+    <!-- TailwindCSS v3 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                            950: '#052e16',
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+
+    <!-- Google Fonts — Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    {% block head %}{% endblock %}
+</head>
+
+<body class="min-h-screen flex flex-col bg-gray-950 text-gray-100 font-sans antialiased">
+
+    <!-- ======= NAVBAR ======= -->
+    <nav class="sticky top-0 z-50 border-b border-gray-800/60 bg-gray-950/80 backdrop-blur-lg">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+
+            <!-- Logo -->
+            <a href="{{ url_for('main.index') }}"
+                class="flex items-center gap-2 text-lg font-bold tracking-tight text-white hover:text-brand-400 transition">
+                <span
+                    class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white text-xl">🐄</span>
+                <span>BreedSense<span class="text-brand-400">AI</span></span>
+            </a>
+
+            <!-- Desktop links -->
+            <ul class="hidden sm:flex items-center gap-1">
+                <li>
+                    <a href="{{ url_for('main.index') }}"
+                        class="rounded-lg px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                        Home
+                    </a>
+                </li>
+                {% if current_user.is_authenticated %}
+                <li>
+                    <a href="{{ url_for('main.upload') }}"
+                        class="rounded-lg px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                        Upload
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('main.history') }}"
+                        class="rounded-lg px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                        History
+                    </a>
+                </li>
+                {% endif %}
+                <li>
+                    <a href="{{ url_for('main.about') }}"
+                        class="rounded-lg px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                        About
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Auth buttons (desktop) -->
+            <div class="hidden sm:flex items-center gap-2">
+                {% if current_user.is_authenticated %}
+                <span
+                    class="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-800/60">
+                    <span
+                        class="flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-[10px] font-bold text-white uppercase">{{
+                        current_user.username[0] }}</span>
+                    {{ current_user.username }}
+                </span>
+                <a href="{{ url_for('auth.logout') }}"
+                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-gray-800 hover:text-red-300 transition">
+                    Logout
+                </a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}"
+                    class="rounded-lg px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                    Login
+                </a>
+                <a href="{{ url_for('auth.register') }}"
+                    class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-500 transition">
+                    Register
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile menu button -->
+            <button id="mobile-menu-btn"
+                class="sm:hidden rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-white transition">
+                <i data-lucide="menu" class="h-5 w-5"></i>
+            </button>
+        </div>
+
+        <!-- Mobile dropdown -->
+        <div id="mobile-menu" class="hidden sm:hidden border-t border-gray-800 bg-gray-950 px-4 pb-4 space-y-1">
+            <a href="{{ url_for('main.index') }}"
+                class="block rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">Home</a>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('main.upload') }}"
+                class="block rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">Upload</a>
+            <a href="{{ url_for('main.history') }}"
+                class="block rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">History</a>
+            {% endif %}
+            <a href="{{ url_for('main.about') }}"
+                class="block rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">About</a>
+            <div class="border-t border-gray-800 pt-2 mt-2">
+                {% if current_user.is_authenticated %}
+                <div class="flex items-center gap-2 px-3 py-2 text-xs text-gray-400">
+                    <span
+                        class="flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-[10px] font-bold text-white uppercase">{{
+                        current_user.username[0] }}</span>
+                    {{ current_user.username }}
+                </div>
+                <a href="{{ url_for('auth.logout') }}"
+                    class="block rounded-lg px-3 py-2 text-sm text-red-400 hover:bg-gray-800 hover:text-red-300">Logout</a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}"
+                    class="block rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">Login</a>
+                <a href="{{ url_for('auth.register') }}"
+                    class="block rounded-lg px-3 py-2 text-sm text-brand-400 hover:bg-gray-800 hover:text-brand-300">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- ======= MAIN CONTENT ======= -->
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ======= FOOTER ======= -->
+    <footer class="border-t border-gray-800/60 bg-gray-950">
+        <div
+            class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500">
+            <p>&copy; 2026 BreedSense AI — Cattle Breed Recognition</p>
+            <p>Built with Flask &middot; PyTorch &middot; MongoDB</p>
+        </div>
+    </footer>
+
+    <!-- Mobile menu toggle -->
+    <script>
+        document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+        lucide.createIcons();
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

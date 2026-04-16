@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Register — BreedSense AI{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-md px-4 py-16 sm:px-6">
+
+    <div class="text-center mb-8">
+        <span
+            class="inline-flex items-center gap-1.5 rounded-full bg-brand-600/10 px-3 py-1 text-xs font-semibold text-brand-400 ring-1 ring-brand-500/20 mb-4">
+            <i data-lucide="user-plus" class="h-3.5 w-3.5"></i> Create Account
+        </span>
+        <h1 class="text-3xl font-extrabold tracking-tight text-white">Get Started</h1>
+        <p class="mt-2 text-sm text-gray-500">Create an account to start identifying cattle breeds.</p>
+    </div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for category, message in messages %}
+        <div class="rounded-xl px-4 py-3 text-sm font-medium
+            {% if category == 'error' %}bg-red-600/10 text-red-400 ring-1 ring-red-500/20
+            {% else %}bg-brand-600/10 text-brand-400 ring-1 ring-brand-500/20{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="rounded-2xl border border-gray-800 bg-gray-900/60 backdrop-blur-sm shadow-xl p-6">
+        <form method="POST" action="{{ url_for('auth.register') }}" class="space-y-5">
+
+            <!-- Username -->
+            <div>
+                <label for="username"
+                    class="block text-xs font-medium uppercase tracking-wider text-gray-500 mb-1.5">Username</label>
+                <input type="text" id="username" name="username" value="{{ username|default('') }}" required
+                    minlength="3" autocomplete="username"
+                    class="w-full rounded-xl border border-gray-700 bg-gray-800/60 px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 focus:outline-none transition"
+                    placeholder="johndoe" />
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label for="email" class="block text-xs font-medium uppercase tracking-wider text-gray-500 mb-1.5">Email
+                    Address</label>
+                <input type="email" id="email" name="email" value="{{ email|default('') }}" required
+                    autocomplete="email"
+                    class="w-full rounded-xl border border-gray-700 bg-gray-800/60 px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 focus:outline-none transition"
+                    placeholder="you@example.com" />
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label for="password"
+                    class="block text-xs font-medium uppercase tracking-wider text-gray-500 mb-1.5">Password</label>
+                <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password"
+                    class="w-full rounded-xl border border-gray-700 bg-gray-800/60 px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 focus:outline-none transition"
+                    placeholder="••••••••" />
+            </div>
+
+            <!-- Confirm Password -->
+            <div>
+                <label for="confirm_password"
+                    class="block text-xs font-medium uppercase tracking-wider text-gray-500 mb-1.5">Confirm
+                    Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required minlength="6"
+                    autocomplete="new-password"
+                    class="w-full rounded-xl border border-gray-700 bg-gray-800/60 px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 focus:outline-none transition"
+                    placeholder="••••••••" />
+            </div>
+
+            <!-- Submit -->
+            <button type="submit"
+                class="w-full flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 hover:bg-brand-500 transition">
+                <i data-lucide="user-plus" class="h-4 w-4"></i>
+                Create Account
+            </button>
+        </form>
+
+        <p class="mt-5 text-center text-xs text-gray-500">
+            Already have an account?
+            <a href="{{ url_for('auth.login') }}"
+                class="text-brand-400 hover:text-brand-300 font-medium transition">Sign in</a>
+        </p>
+    </div>
+</div>
+<script>lucide.createIcons();</script>
+{% endblock %}

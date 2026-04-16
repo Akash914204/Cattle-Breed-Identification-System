@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}Upload — BreedSense AI{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+
+    <!-- ======= PAGE HEADER ======= -->
+    <div class="text-center mb-10">
+        <span
+            class="inline-flex items-center gap-1.5 rounded-full bg-brand-600/10 px-3 py-1 text-xs font-semibold text-brand-400 ring-1 ring-brand-500/20 mb-4">
+            <i data-lucide="scan-eye" class="h-3.5 w-3.5"></i> AI-Powered Analysis
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            Identify Cattle Breed
+        </h1>
+        <p class="mt-2 text-gray-400 max-w-lg mx-auto">
+            Upload a clear photograph and our deep-learning model will predict the breed with confidence scoring.
+        </p>
+    </div>
+
+    <!-- ======= UPLOAD CARD ======= -->
+    <div class="rounded-2xl border border-gray-800 bg-gray-900/60 backdrop-blur-sm shadow-xl overflow-hidden">
+
+        <!-- Drop zone -->
+        <div id="drop-zone"
+            class="relative group cursor-pointer border-2 border-dashed border-gray-700 hover:border-brand-500 rounded-xl m-5 p-10 transition-colors duration-300 text-center">
+
+            <!-- Idle state -->
+            <div id="drop-idle" class="flex flex-col items-center gap-3">
+                <div
+                    class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-800 group-hover:bg-brand-600/20 transition">
+                    <i data-lucide="upload-cloud"
+                        class="h-8 w-8 text-gray-500 group-hover:text-brand-400 transition"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-300">Drag &amp; drop your image here</p>
+                    <p class="mt-1 text-xs text-gray-500">or <span
+                            class="text-brand-400 underline underline-offset-2">browse files</span></p>
+                </div>
+                <p class="text-[11px] text-gray-600">Supports JPG, PNG, WEBP &bull; Max 16 MB</p>
+            </div>
+
+            <!-- Image preview (hidden until file selected) -->
+            <div id="preview-container" class="hidden flex-col items-center gap-4">
+                <div class="relative">
+                    <img id="preview-image" src="" alt="Preview"
+                        class="max-h-64 rounded-xl border border-gray-700 shadow-lg object-contain" />
+                    <button id="remove-image" type="button"
+                        class="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-600 text-white shadow hover:bg-red-500 transition">
+                        <i data-lucide="x" class="h-4 w-4"></i>
+                    </button>
+                </div>
+                <p id="file-name" class="text-xs text-gray-400 truncate max-w-xs"></p>
+            </div>
+
+            <!-- Hidden file input -->
+            <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp"
+                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+        </div>
+
+        <!-- Predict button -->
+        <div class="px-5 pb-5">
+            <button id="predict-btn" disabled
+                class="w-full flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-500 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-brand-600">
+                <i data-lucide="sparkles" class="h-4 w-4"></i>
+                <span id="predict-btn-text">Predict Breed</span>
+                <!-- Spinner (hidden by default) -->
+                <svg id="predict-spinner" class="hidden h-5 w-5 animate-spin text-white"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- ======= RESULTS SECTION ======= -->
+    <div id="results-section"
+        class="hidden mt-8 rounded-2xl border border-gray-800 bg-gray-900/60 backdrop-blur-sm shadow-xl overflow-hidden animate-fade-in">
+
+        <!-- Header -->
+        <div class="flex items-center gap-2 px-6 py-4 border-b border-gray-800 bg-gray-900/80">
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600/20">
+                <i data-lucide="check-circle-2" class="h-4 w-4 text-brand-400"></i>
+            </div>
+            <h2 class="text-base font-semibold text-white">Analysis Result</h2>
+        </div>
+
+        <!-- Body: Image + Prediction -->
+        <div class="grid sm:grid-cols-2 gap-6 p-6">
+
+            <!-- Left: Uploaded image -->
+            <div class="flex items-center justify-center">
+                <img id="result-image" src="" alt="Uploaded cattle"
+                    class="max-h-72 w-full rounded-xl border border-gray-700 object-contain shadow-lg" />
+            </div>
+
+            <!-- Right: Prediction details -->
+            <div class="flex flex-col justify-center gap-5">
+
+                <!-- Breed badge -->
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wider text-gray-500 mb-1">Predicted Breed</p>
+                    <p id="result-breed" class="text-2xl font-extrabold text-white"></p>
+                </div>
+
+                <!-- Confidence bar -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <p class="text-xs font-medium uppercase tracking-wider text-gray-500">Confidence</p>
+                        <p id="result-confidence-text" class="text-sm font-bold text-brand-400"></p>
+                    </div>
+                    <div class="h-3 w-full rounded-full bg-gray-800 overflow-hidden">
+                        <div id="result-confidence-bar"
+                            class="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-400 transition-all duration-700 ease-out"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Meta info -->
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <div class="rounded-lg bg-gray-800/60 p-3">
+                        <p class="text-[11px] text-gray-500 mb-0.5">Model</p>
+                        <p class="text-xs font-semibold text-gray-300">ResNet-50</p>
+                    </div>
+                    <div class="rounded-lg bg-gray-800/60 p-3">
+                        <p class="text-[11px] text-gray-500 mb-0.5">Classes</p>
+                        <p class="text-xs font-semibold text-gray-300">5 Breeds</p>
+                    </div>
+                </div>
+
+                <!-- Try again -->
+                <button id="try-again-btn"
+                    class="mt-1 flex items-center justify-center gap-2 rounded-xl border border-gray-700 bg-gray-800/50 px-4 py-2.5 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                    <i data-lucide="refresh-cw" class="h-3.5 w-3.5"></i>
+                    Try Another Image
+                </button>
+            </div>
+        </div>
+
+        <!-- ======= GRAD-CAM HEATMAP SECTION ======= -->
+        <div id="gradcam-section" class="hidden border-t border-gray-800">
+            <div class="px-6 py-4 bg-gray-900/80 flex items-center gap-2">
+                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/20">
+                    <i data-lucide="flame" class="h-4 w-4 text-orange-400"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white">Grad-CAM Explainability</h3>
+                    <p class="text-[11px] text-gray-500">Highlighted regions show which parts of the image influenced
+                        the prediction</p>
+                </div>
+            </div>
+            <div class="p-5">
+                <div class="rounded-xl border border-gray-700 bg-gray-950 overflow-hidden shadow-inner">
+                    <img id="gradcam-image" src="" alt="Grad-CAM Heatmap" class="w-full object-contain" />
+                </div>
+                <!-- Legend -->
+                <div class="flex items-center justify-center gap-4 mt-4 text-[11px] text-gray-500">
+                    <div class="flex items-center gap-1.5">
+                        <span class="inline-block h-2.5 w-5 rounded-sm bg-blue-600"></span> Low influence
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="inline-block h-2.5 w-5 rounded-sm bg-green-500"></span> Medium
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="inline-block h-2.5 w-5 rounded-sm bg-yellow-400"></span> High
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="inline-block h-2.5 w-5 rounded-sm bg-red-500"></span> Critical
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======= ERROR TOAST ======= -->
+    <div id="error-toast"
+        class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl bg-red-600/90 backdrop-blur px-5 py-3 text-sm font-medium text-white shadow-lg shadow-red-900/30">
+        <i data-lucide="alert-circle" class="h-4 w-4 shrink-0"></i>
+        <span id="error-toast-text"></span>
+    </div>
+</div>
+
+<!-- Fade-in animation -->
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fadeInUp 0.45s ease-out both;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (() => {
+        // ----- DOM refs -----
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const dropIdle = document.getElementById('drop-idle');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+        const fileName = document.getElementById('file-name');
+        const removeBtn = document.getElementById('remove-image');
+        const predictBtn = document.getElementById('predict-btn');
+        const predictBtnText = document.getElementById('predict-btn-text');
+        const predictSpinner = document.getElementById('predict-spinner');
+        const resultsSection = document.getElementById('results-section');
+        const resultImage = document.getElementById('result-image');
+        const resultBreed = document.getElementById('result-breed');
+        const resultConfText = document.getElementById('result-confidence-text');
+        const resultConfBar = document.getElementById('result-confidence-bar');
+        const tryAgainBtn = document.getElementById('try-again-btn');
+        const errorToast = document.getElementById('error-toast');
+        const errorToastText = document.getElementById('error-toast-text');
+        // Grad-CAM elements
+        const gradcamSection = document.getElementById('gradcam-section');
+        const gradcamImage = document.getElementById('gradcam-image');
+
+        let selectedFile = null;
+
+        // ----- Helpers -----
+        function showPreview(file) {
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                dropIdle.classList.add('hidden');
+                previewContainer.classList.remove('hidden');
+                previewContainer.classList.add('flex');
+                predictBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+            fileName.textContent = file.name;
+        }
+
+        function resetUpload() {
+            selectedFile = null;
+            fileInput.value = '';
+            previewImage.src = '';
+            previewContainer.classList.add('hidden');
+            previewContainer.classList.remove('flex');
+            dropIdle.classList.remove('hidden');
+            predictBtn.disabled = true;
+            resultsSection.classList.add('hidden');
+            gradcamSection.classList.add('hidden');
+            gradcamImage.src = '';
+        }
+
+        function showError(msg) {
+            errorToastText.textContent = msg;
+            errorToast.classList.remove('hidden');
+            setTimeout(() => errorToast.classList.add('hidden'), 4000);
+        }
+
+        // ----- Drag & Drop -----
+        ['dragenter', 'dragover'].forEach(evt => {
+            dropZone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-brand-500', 'bg-brand-600/5');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(evt => {
+            dropZone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-brand-500', 'bg-brand-600/5');
+            });
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                showPreview(file);
+            } else {
+                showError('Please upload a valid image file.');
+            }
+        });
+
+        // ----- File input change -----
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) showPreview(fileInput.files[0]);
+        });
+
+        // ----- Remove image -----
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetUpload();
+        });
+
+        // ----- Predict -----
+        predictBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            // UI: loading state
+            predictBtn.disabled = true;
+            predictBtnText.textContent = 'Analysing…';
+            predictSpinner.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+
+            try {
+                const res = await fetch('/api/predict', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showError(data.error || 'Prediction failed.');
+                    return;
+                }
+
+                // Populate results
+                resultImage.src = previewImage.src;
+                resultBreed.textContent = data.breed;
+                resultConfText.textContent = data.confidence + '%';
+
+                // Animate confidence bar
+                resultConfBar.style.width = '0%';
+                resultsSection.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        resultConfBar.style.width = data.confidence + '%';
+                    });
+                });
+
+                // Colour the bar based on confidence
+                if (data.confidence >= 80) {
+                    resultConfBar.className = resultConfBar.className.replace(/from-\S+\s+to-\S+/, 'from-brand-500 to-brand-400');
+                } else if (data.confidence >= 50) {
+                    resultConfBar.className = resultConfBar.className.replace(/from-\S+\s+to-\S+/, 'from-yellow-500 to-yellow-400');
+                } else {
+                    resultConfBar.className = resultConfBar.className.replace(/from-\S+\s+to-\S+/, 'from-red-500 to-red-400');
+                }
+
+                // Show Grad-CAM heatmap if available
+                if (data.heatmap_url) {
+                    gradcamImage.src = data.heatmap_url;
+                    gradcamSection.classList.remove('hidden');
+                } else {
+                    gradcamSection.classList.add('hidden');
+                }
+
+                // Re-init icons for new DOM
+                lucide.createIcons();
+
+            } catch (err) {
+                console.error(err);
+                showError('Could not connect to the server.');
+            } finally {
+                predictBtn.disabled = false;
+                predictBtnText.textContent = 'Predict Breed';
+                predictSpinner.classList.add('hidden');
+            }
+        });
+
+        // ----- Try Again -----
+        tryAgainBtn.addEventListener('click', resetUpload);
+
+        // Reinit Lucide icons
+        lucide.createIcons();
+    })();
+</script>
+{% endblock %}
